@@ -82,10 +82,11 @@ public class serveur {
 				
 				// Envoie d'un message au client
 				out.writeUTF("Hello from server - you are client #" + this.clientNumber);
+				DataInputStream in = new DataInputStream(socket.getInputStream());
 				String command = "";
-				while(command != "exit") {
-					DataInputStream clientIn = new DataInputStream(socket.getInputStream());
-					command = clientIn.readUTF();
+				while(!command.equals("exit")) {
+					command = in.readUTF();
+					System.out.println("executing command : " + command);
 					switch(command) {
 						default: break;
 						case "cd": 
@@ -104,8 +105,10 @@ public class serveur {
 							out.writeUTF("server fait download");
 							break;
 					}
-					out.writeUTF("exit");
+					out.writeUTF("server dit : bye bye");
+					out.flush();
 				}
+				
 			} catch (IOException e) {
 				System.out.println("Error handling client #" + this.clientNumber
 									+ " : " + e);

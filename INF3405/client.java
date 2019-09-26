@@ -14,7 +14,6 @@ public class client {
 		Scanner s = new Scanner(System.in);
 		String serverAddress = demandeAdresse(s);
 		int port = demandePort(s);
-		s.close();
 		
 		// Creation d'une nouvelle connection ave le serveur
 		socket = new Socket(serverAddress, port);
@@ -24,19 +23,25 @@ public class client {
 		DataInputStream in = new DataInputStream(socket.getInputStream());
 		
 		// Attente de la reception d'un message envoye par le server
-		String message = "";
-		BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
+		String message = in.readUTF();
+		System.out.println(message);
+		
+		// gerer la communication avec le serveur
 		DataOutputStream out = new DataOutputStream(socket.getOutputStream());
-		while(message != "exit") {
+		BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
+		String command = "";
+		while(!command.equals("exit")) {
+			System.out.println("Entrez une commande : ");
+			command = input.readLine();
+			out.writeUTF(command);
+			out.flush();
 			message = in.readUTF();
 			System.out.println(message);
-			System.out.println("entrez une commande");
-			String command = input.readLine();
-			out.writeUTF(command);			
 		}
+		System.out.println("Client : Vous avez sorti de la boucle while.");
+		
 		// Fermeture de la connection avec le server
 		socket.close();
-		input.close();
 	}
 	
 	public static boolean isNumeric(String s) {

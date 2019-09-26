@@ -1,5 +1,6 @@
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -84,30 +85,54 @@ public class serveur {
 				out.writeUTF("Hello from server - you are client #" + this.clientNumber);
 				DataInputStream in = new DataInputStream(socket.getInputStream());
 				String command = "";
+				
+				// get current directory
+				String currentDir = new java.io.File(".").getCanonicalPath();
+				
 				while(!command.equals("exit")) {
 					command = in.readUTF();
-					System.out.println("executing command : " + command);
 					switch(command) {
-						default: break;
+						default: 
+							out.writeUTF("commande invalide!");
+							break;
 						case "cd": 
 							out.writeUTF("server fait cd");
+							System.out.println("executing command : " + command);
+
+							
 							break;
 						case "ls":
-							out.writeUTF("server fait ls");
+							System.out.println("executing command : " + command);
+							File dir = new File(".");
+							File[] liste = dir.listFiles();
+							String affichage = currentDir + '\n';
+							for (File fichier : liste) {
+								if(fichier.isFile() || fichier.isDirectory()) {
+									affichage += fichier.getName() + '\t';
+								}
+							}
+							out.writeUTF(affichage);
+
 							break;
 						case "mkdir":
 							out.writeUTF("server fait mkdir");
+							System.out.println("executing command : " + command);
+
 							break;
 						case "upload":
 							out.writeUTF("server fait upload");
+							System.out.println("executing command : " + command);
+
 							break;
 						case "download":
 							out.writeUTF("server fait download");
+							System.out.println("executing command : " + command);
+
 							break;
 					}
-					out.writeUTF("server dit : bye bye");
-					out.flush();
 				}
+				out.writeUTF("fermeture de la connection avec le server");
+				out.flush();
 				
 			} catch (IOException e) {
 				System.out.println("Error handling client #" + this.clientNumber

@@ -30,8 +30,12 @@ public class client {
 		DataOutputStream out = new DataOutputStream(socket.getOutputStream());
 		BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
 		String command = "";
+		
+		
 		while(!command.equals("exit")) {
-			System.out.println("Entrez une commande : ");
+						
+			
+			System.out.println(">>>");
 			command = input.readLine();
 			out.writeUTF(command);
 			out.flush();

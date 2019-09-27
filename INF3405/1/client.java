@@ -19,7 +19,7 @@ public class client {
 		socket = new Socket(serverAddress, port);
 		System.out.format("The server is running on %s:%d%n", serverAddress, port);
 		
-		// Creation d'un canal entrant pour recevoir les messages envoyés par le server
+		// Creation d'un canal entrant pour recevoir les messages envoyï¿½s par le server
 		DataInputStream in = new DataInputStream(socket.getInputStream());
 		
 		// Attente de la reception d'un message envoye par le server
@@ -60,7 +60,7 @@ public class client {
 		Boolean mauvaisPort = true;
 		int port = 0;
 		while (mauvaisPort) {
-			System.out.println("Entrez un port d'écoute [5000-5050] : ");
+			System.out.println("Entrez un port d'Ã©coute [5000-5050] : ");
 			String input = s.next();
 			if(isNumeric(input)) {
 				port = Integer.parseInt(input);

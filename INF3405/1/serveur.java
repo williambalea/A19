@@ -20,12 +20,12 @@ public class serveur {
 		String serverAddress = "127.0.0.1"; // aussi localhost
 		int serverPort = demandePort();
 		
-		// Création du ServerSocket pour trouver les clients
+		// Crï¿½ation du ServerSocket pour trouver les clients
 		listener = new ServerSocket();
 		listener.setReuseAddress(true);
 		InetAddress serverIP = InetAddress.getByName(serverAddress);
 		
-		// Association de l'Adresse et du port à la connection
+		// Association de l'Adresse et du port ï¿½ la connection
 		listener.bind(new InetSocketAddress(serverIP, serverPort));
 		
 		System.out.format("The server is running on %s:%d%n", serverAddress, serverPort);
@@ -47,7 +47,7 @@ public class serveur {
 		int port = 0;
 		
 		while(mauvaisPort) {
-			System.out.println("Entrez un port d'écoute [5000-5050] : ");
+			System.out.println("Entrez un port d'Ã©coute [5000-5050] : ");
 			if (input.hasNextInt()) {
 				port = input.nextInt();
 				if (port < 5000 || port > 5050) {
@@ -78,7 +78,7 @@ public class serveur {
 		// Thread qui se charge d'envoyer au client un message de bienvenue
 		public void run() {
 			try {
-				// Création d'un canal sortant pour envoyer des messages au client
+				// Crï¿½ation d'un canal sortant pour envoyer des messages au client
 				DataOutputStream out = new DataOutputStream(socket.getOutputStream());
 				
 				// Envoie d'un message au client

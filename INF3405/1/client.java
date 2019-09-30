@@ -5,7 +5,7 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import java.util.Scanner;
 
-public class Client {
+public class client {
 	private static Socket socket;
 	
 	public static void main(String[] args) throws Exception {

@@ -5,7 +5,7 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import java.util.Scanner;
 
-public class client {
+public class Client {
 	private static Socket socket;
 	
 	public static void main(String[] args) throws Exception {
@@ -19,7 +19,7 @@ public class client {
 		socket = new Socket(serverAddress, port);
 		System.out.format("The server is running on %s:%d%n", serverAddress, port);
 		
-		// Creation d'un canal entrant pour recevoir les messages envoy�s par le server
+		// Creation d'un canal entrant pour recevoir les messages envoyés par le server
 		DataInputStream in = new DataInputStream(socket.getInputStream());
 		
 		// Attente de la reception d'un message envoye par le server

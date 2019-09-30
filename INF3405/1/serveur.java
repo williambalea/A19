@@ -6,6 +6,9 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Scanner;
 
 public class serveur {
@@ -91,45 +94,46 @@ public class serveur {
 				
 				while(!command.equals("exit")) {
 					command = in.readUTF();
-					switch(command) {
-						default: 
-							out.writeUTF("commande invalide!");
-							break;
-						case "cd": 
-							out.writeUTF("server fait cd");
-							System.out.println("executing command : " + command);
+					
+					
+					if(command.equals("cd")) {
+						out.writeUTF("server fait cd");
+						System.out.println("executing command : " + command);
 
-							
-							break;
-						case "ls":
-							System.out.println("executing command : " + command);
-							File dir = new File(".");
-							File[] liste = dir.listFiles();
-							String affichage = currentDir + '\n';
-							for (File fichier : liste) {
-								if(fichier.isFile() || fichier.isDirectory()) {
-									affichage += fichier.getName() + '\t';
-								}
+					} else if (command.equals("ls")) {
+						System.out.println("executing command : " + command);
+						File dir = new File(".");
+						File[] liste = dir.listFiles();
+						String affichage = currentDir + '\n';
+						for (File fichier : liste) {
+							if(fichier.isFile() || fichier.isDirectory()) {
+								affichage += fichier.getName() + '\t';
 							}
-							out.writeUTF(affichage);
+						}
+						out.writeUTF(affichage);
+	
+					} else if (command.substring(0, 6).equals("mkdir ")) {
+					 	Path path = Paths.get(currentDir + '/' + command.substring(6, command.length()));
+					 	if(!Files.exists(path)) {
+					 		Files.createDirectory(path);
+					 		out.writeUTF("Nouveau dossier " + command.substring(6, command.length()) + " fait");
+					 	} else {
+					 		out.writeUTF(command.substring(6, command.length()) + " existe deja!");
+					 	}
 
-							break;
-						case "mkdir":
-							out.writeUTF("server fait mkdir");
-							System.out.println("executing command : " + command);
-
-							break;
-						case "upload":
-							out.writeUTF("server fait upload");
-							System.out.println("executing command : " + command);
-
-							break;
-						case "download":
-							out.writeUTF("server fait download");
-							System.out.println("executing command : " + command);
-
-							break;
+					} else if (command.equals("upload")) {
+						out.writeUTF("server fait upload");
+						System.out.println("executing command : " + command);
+						
+					} else if (command.equals("download")) {
+						out.writeUTF("server fait download");
+						System.out.println("executing command : " + command);
+						
+					} else {
+						out.writeUTF("commande invalide!");
+						
 					}
+					
 				}
 				out.writeUTF("fermeture de la connection avec le server");
 				out.flush();

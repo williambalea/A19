@@ -112,7 +112,7 @@ public class serveur {
 						}
 						out.writeUTF(affichage);
 	
-					} else if (command.substring(0, 6).equals("mkdir ")) {
+					} else if (command.length() > 5 && command.substring(0, 6).equals("mkdir ")) {
 					 	Path path = Paths.get(currentDir + '/' + command.substring(6, command.length()));
 					 	if(!Files.exists(path)) {
 					 		Files.createDirectory(path);
@@ -129,13 +129,15 @@ public class serveur {
 						out.writeUTF("server fait download");
 						System.out.println("executing command : " + command);
 						
+					} else if (command.equals("exit")) {
+						// do nothing
 					} else {
 						out.writeUTF("commande invalide!");
 						
 					}
 					
 				}
-				out.writeUTF("fermeture de la connection avec le server");
+				out.writeUTF("fermeture de la connection avec le serveur");
 				out.flush();
 				
 			} catch (IOException e) {

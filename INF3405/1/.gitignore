@@ -1,1 +1,4 @@
+#ignoring .vscode foler
+/.vscode
 .vscode/
+../.vscode/

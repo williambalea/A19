@@ -11,6 +11,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Scanner;
 import java.util.Vector;
+import java.util.regex.Pattern;
 
 public class serveur {
 
@@ -94,11 +95,21 @@ public class serveur {
 				String command = "";
 				
 				// get current directory
-				baseDir = new java.io.File(".").getCanonicalPath();	
+				baseDir = new java.io.File(".").getCanonicalPath();
+
+				// setting the root of server
+				Path serverRootPath = Paths.get(getDir() + "/serverRoot");
+				if(!Files.exists(serverRootPath)) {
+					Files.createDirectory(serverRootPath);
+				}
+				baseDir = new java.io.File("./serverRoot").getCanonicalPath();
+
+
 				
 				while(!command.equals("exit")) {
 					command = in.readUTF();
 					
+					// cd 
 					if (command.length() > 2 && command.substring(0, 3).equals("cd ")) {
 						System.out.println("executing command : " + command);
 						String newDir = command.substring(3, command.length());
@@ -106,59 +117,71 @@ public class serveur {
 							try {
 								int lastElement = dirs.size() - 1;
 								dirs.remove(lastElement);
+								out.writeUTF(getDir() + "\nVous etes dans le dossier " + getDirName());
 							} catch(Exception e) {
-								// do not pop dirs
+								out.writeUTF("Impossible de sortir du repertoire serverRoot : acces refuse");
 							}
-							out.writeUTF(getDir());
 						} else {
 							Path path = Paths.get(getDir() + '/' + newDir);
 							if(!Files.exists(path)) {
 								out.writeUTF("repertoire " + newDir + " introuvable!" + '\n' + getDir());
 							} else {
 								dirs.add(newDir);
-								out.writeUTF(getDir());
+								out.writeUTF(getDir() + "\nVous etes dans le dossier " + getDirName());
 							}
 						}
-
+					
+					// ls
 					} else if (command.equals("ls")) {
 						System.out.println("executing command : " + command);
-						File dir = new File("." + getDirsList());
+						File dir = new File(".\\serverRoot" + getDirsList());
 						File[] liste = dir.listFiles();
-						String affichage = getDir() + '\n';
+						String affichage = getDir();
 						for (File fichier : liste) {
-							if(fichier.isFile() || fichier.isDirectory()) {
-								affichage += fichier.getName() + '\t';
+							if(fichier.isFile()) {
+								affichage += '\n' + "[File] " + fichier.getName();
+							}
+							
+							if (fichier.isDirectory()) {
+								affichage += '\n' + "[Folder] " + fichier.getName();
 							}
 						}
 						out.writeUTF(affichage);
 	
+					// mkdir
 					} else if (command.length() > 5 && command.substring(0, 6).equals("mkdir ")) {
 						System.out.println("executing command : " + command);
-					 	Path path = Paths.get(getDir() + '/' + command.substring(6, command.length()));
+						String newDir = command.substring(6, command.length());
+					 	Path path = Paths.get(getDir() + '/' + newDir);
 					 	if(!Files.exists(path)) {
 					 		Files.createDirectory(path);
-					 		out.writeUTF("Nouveau dossier " + command.substring(6, command.length()) + " cr�e!");
+					 		out.writeUTF("Le dossier " + newDir + " a ete cree!");
 					 	} else {
-					 		out.writeUTF(command.substring(6, command.length()) + " existe deja!");
+					 		out.writeUTF(newDir + " existe deja!");
 					 	}
 
+					// upload
 					} else if (command.equals("upload")) {
 						out.writeUTF("server fait upload");
 						System.out.println("executing command : " + command);
-						
+					
+					//download
 					} else if (command.equals("download")) {
 						out.writeUTF("server fait download");
 						System.out.println("executing command : " + command);
 						
+					// exit
 					} else if (command.equals("exit")) {
 						// do nothing
+
+					// other commands
 					} else {
 						out.writeUTF("commande invalide!");
 						
 					}
 					
 				}
-				out.writeUTF("fermeture de la connection avec le serveur");
+				out.writeUTF("Vous avez ete deconnecte avec succes.");
 				out.flush();
 				
 			} catch (IOException e) {
@@ -185,6 +208,12 @@ public class serveur {
 
 		public String getDir() {
 			return baseDir + getDirsList();
+		}
+
+		public String getDirName() {
+			String[] allDirs = getDir().split(Pattern.quote(File.separator));
+			int lastElement = allDirs.length - 1;
+			return allDirs[lastElement];
 		}
 	}
 }

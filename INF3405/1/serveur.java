@@ -91,15 +91,22 @@ public class serveur {
 				
 				// get current directory
 				String currentDir = new java.io.File(".").getCanonicalPath();
+	
 				
 				while(!command.equals("exit")) {
 					command = in.readUTF();
 					
-					
-					if(command.equals("cd")) {
-						out.writeUTF("server fait cd");
-						System.out.println("executing command : " + command);
-
+					if (command.length() > 2 && command.substring(0, 3).equals("cd ")) {
+						Path path = Paths.get(currentDir + '/' + command.substring(3, command.length()));
+							if (command.substring(3, command.length()).equals("..")) {
+								out.writeUTF("oui deux points bro");
+						
+							} else if (Files.exists(path)) {
+								out.writeUTF(path.toString());
+							} else {
+							out.writeUTF("Le dossier n'existe pas!");
+						}
+							out.writeUTF("Le dossier n'existe pas!");
 					} else if (command.equals("ls")) {
 						System.out.println("executing command : " + command);
 						File dir = new File(".");
@@ -116,7 +123,7 @@ public class serveur {
 					 	Path path = Paths.get(currentDir + '/' + command.substring(6, command.length()));
 					 	if(!Files.exists(path)) {
 					 		Files.createDirectory(path);
-					 		out.writeUTF("Nouveau dossier " + command.substring(6, command.length()) + " fait");
+					 		out.writeUTF("Nouveau dossier " + command.substring(6, command.length()) + " crée!");
 					 	} else {
 					 		out.writeUTF(command.substring(6, command.length()) + " existe deja!");
 					 	}

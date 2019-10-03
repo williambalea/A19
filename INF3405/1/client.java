@@ -34,7 +34,7 @@ public class client {
 		
 		while(!command.equals("exit")) {
 						
-			System.out.println(">>>");
+			System.out.println(">>> ");
 			command = input.readLine();
 			out.writeUTF(command);
 			out.flush();

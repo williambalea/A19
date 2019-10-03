@@ -10,6 +10,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Scanner;
+import java.util.Vector;
 
 public class serveur {
 
@@ -69,6 +70,9 @@ public class serveur {
 	private static class ClientHandler extends Thread {
 		private Socket socket;
 		private int clientNumber;
+
+		String baseDir;
+		Vector<String> dirs = new Vector<String>();
 		
 		public ClientHandler(Socket socket, int clientNumber) {
 			this.socket = socket;
@@ -90,28 +94,37 @@ public class serveur {
 				String command = "";
 				
 				// get current directory
-				String currentDir = new java.io.File(".").getCanonicalPath();
-	
+				baseDir = new java.io.File(".").getCanonicalPath();	
 				
 				while(!command.equals("exit")) {
 					command = in.readUTF();
 					
 					if (command.length() > 2 && command.substring(0, 3).equals("cd ")) {
-						Path path = Paths.get(currentDir + '/' + command.substring(3, command.length()));
-							if (command.substring(3, command.length()).equals("..")) {
-								out.writeUTF("oui deux points bro");
-						
-							} else if (Files.exists(path)) {
-								out.writeUTF(path.toString());
+						System.out.println("executing command : " + command);
+						String newDir = command.substring(3, command.length());
+						if(newDir.equals("..")) {
+							try {
+								int lastElement = dirs.size() - 1;
+								dirs.remove(lastElement);
+							} catch(Exception e) {
+								// do not pop dirs
+							}
+							out.writeUTF(getDir());
+						} else {
+							Path path = Paths.get(getDir() + '/' + newDir);
+							if(!Files.exists(path)) {
+								out.writeUTF("repertoire " + newDir + " introuvable!" + '\n' + getDir());
 							} else {
-							out.writeUTF("Le dossier n'existe pas!");
+								dirs.add(newDir);
+								out.writeUTF(getDir());
+							}
 						}
-							out.writeUTF("Le dossier n'existe pas!");
+
 					} else if (command.equals("ls")) {
 						System.out.println("executing command : " + command);
-						File dir = new File(".");
+						File dir = new File("." + getDirsList());
 						File[] liste = dir.listFiles();
-						String affichage = currentDir + '\n';
+						String affichage = getDir() + '\n';
 						for (File fichier : liste) {
 							if(fichier.isFile() || fichier.isDirectory()) {
 								affichage += fichier.getName() + '\t';
@@ -120,10 +133,11 @@ public class serveur {
 						out.writeUTF(affichage);
 	
 					} else if (command.length() > 5 && command.substring(0, 6).equals("mkdir ")) {
-					 	Path path = Paths.get(currentDir + '/' + command.substring(6, command.length()));
+						System.out.println("executing command : " + command);
+					 	Path path = Paths.get(getDir() + '/' + command.substring(6, command.length()));
 					 	if(!Files.exists(path)) {
 					 		Files.createDirectory(path);
-					 		out.writeUTF("Nouveau dossier " + command.substring(6, command.length()) + " crée!");
+					 		out.writeUTF("Nouveau dossier " + command.substring(6, command.length()) + " crï¿½e!");
 					 	} else {
 					 		out.writeUTF(command.substring(6, command.length()) + " existe deja!");
 					 	}
@@ -159,6 +173,18 @@ public class serveur {
 				}
 				System.out.println("Connection with client #" + this.clientNumber + " closed");
 			}
+		}
+		
+		public String getDirsList() {
+			String buffer = "";
+			for(String dir : dirs) {
+				buffer += "\\" + dir;
+			}
+			return buffer;
+		}
+
+		public String getDir() {
+			return baseDir + getDirsList();
 		}
 	}
 }

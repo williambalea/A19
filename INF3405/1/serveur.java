@@ -1,7 +1,10 @@
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
@@ -87,12 +90,16 @@ public class serveur {
 		public void run() {
 			try {
 				// Cr�ation d'un canal sortant pour envoyer des messages au client
+				// creation canal pour envoyer fichier
 				DataOutputStream out = new DataOutputStream(socket.getOutputStream());
+				// OutputStream fileOut = socket.getOutputStream();
 				
 				// Envoie d'un message au client
+				// envoie d'un fichier au client
 				out.writeUTF("Hello from server - you are client #" + this.clientNumber);
 				DataInputStream in = new DataInputStream(socket.getInputStream());
 				String command = "";
+				// InputStream fileIn = new FileInputStream("send.jpg");
 				
 				// get current directory
 				baseDir = new java.io.File(".").getCanonicalPath();
@@ -166,9 +173,17 @@ public class serveur {
 						System.out.println("executing command : " + command);
 					
 					//download
-					} else if (command.equals("download")) {
-						out.writeUTF("server fait download");
-						System.out.println("executing command : " + command);
+					} else if (command.length() > 8 && command.substring(0, 9).equals("download ")) {
+						String fileName = command.substring(9, command.length());
+						Path path = Paths.get(getDir() + '/' + fileName);
+						if(!Files.exists(path)) {
+							out.writeUTF("fichier " + fileName + " introuvable!" + '\n' + getDir());
+						} else {
+							out.writeUTF("server fait download");
+							System.out.println("executing command : " + command);
+							InputStream fileIn = new FileInputStream(getDir() + '/' + fileName);
+							envoyerFichier(fileIn, out);
+						}
 						
 					// exit
 					} else if (command.equals("exit")) {
@@ -214,6 +229,14 @@ public class serveur {
 			String[] allDirs = getDir().split(Pattern.quote(File.separator));
 			int lastElement = allDirs.length - 1;
 			return allDirs[lastElement];
+		}
+
+		public void envoyerFichier(InputStream fileIn, OutputStream fileOut) throws IOException {
+			byte[] buffer = new byte[8192];
+			int compteur = 0;
+			while ((compteur = fileIn.read(buffer)) != -1) {
+				fileOut.write(buffer, 0, compteur);
+			}
 		}
 	}
 }

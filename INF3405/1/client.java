@@ -1,7 +1,11 @@
 import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.Socket;
 import java.util.Scanner;
 
@@ -31,15 +35,38 @@ public class client {
 		BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
 		String command = "";
 		
+		// gerer l'envoi/la reception des fichiers
+		OutputStream fileOut;
+		
 		
 		while(!command.equals("exit")) {
 						
 			System.out.println(">>> ");
 			command = input.readLine();
+
+			
+			
 			out.writeUTF(command);
 			out.flush();
 			message = in.readUTF();
 			System.out.println(message);
+			
+			if(message.equals("server fait download") && command.length() > 8 && command.substring(0, 9).equals("download ")) {
+				// InputStream fileIn = socket.getInputStream();
+				System.out.println("allo1");
+
+				String fileName = command.substring(9, command.length());
+				System.out.println("allo2");
+
+				fileOut = new FileOutputStream(fileName);
+				System.out.println("allo3");
+
+				envoyerFichier(in, fileOut);
+				// command = "";
+				System.out.println("allo4");
+			}
+			System.out.println("le while recommence");
+			
 		}
 		System.out.println("Client : Vous avez sorti de la boucle while.");
 		
@@ -90,5 +117,13 @@ public class client {
 			
 		}
 		return adresse;
-	} 
+	}
+	
+	public static void envoyerFichier(InputStream fileIn, OutputStream fileOut) throws IOException {
+		byte[] buffer = new byte[8192];
+		int compteur = 0;
+		while ((compteur = fileIn.read(buffer)) > 0) {
+			fileOut.write(buffer, 0, compteur);
+		}
+	}
 }

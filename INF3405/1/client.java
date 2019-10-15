@@ -1,12 +1,16 @@
 import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Scanner;
 
 public class client {
@@ -37,6 +41,7 @@ public class client {
 		
 		// gerer l'envoi/la reception des fichiers
 		OutputStream fileOut;
+		String baseDir = new java.io.File(".").getCanonicalPath();
 		
 		
 		while(!command.equals("exit")) {
@@ -44,29 +49,34 @@ public class client {
 			System.out.println(">>> ");
 			command = input.readLine();
 
-			
-			
-			out.writeUTF(command);
-			out.flush();
-			message = in.readUTF();
-			System.out.println(message);
-			
-			if(message.equals("server fait download") && command.length() > 8 && command.substring(0, 9).equals("download ")) {
-				// InputStream fileIn = socket.getInputStream();
-				System.out.println("allo1");
-
-				String fileName = command.substring(9, command.length());
-				System.out.println("allo2");
-
-				fileOut = new FileOutputStream(fileName);
-				System.out.println("allo3");
-
-				envoyerFichier(in, fileOut);
-				// command = "";
-				System.out.println("allo4");
+			if(command.length() > 6 && command.substring(0, 7).equals("upload ")) {
+				String fileName = command.substring(7, command.length());
+				Path path = Paths.get(baseDir + '/' + fileName);
+				if(!Files.exists(path)) {
+					command = "";
+					out.writeUTF(command);
+					out.flush();
+					message = in.readUTF();
+					System.out.println(message);
+				} else {
+					out.writeUTF(command); // hey server je veux faire upload car.jpg
+					message = in.readUTF(); // hey client j'execute la commande upload
+					InputStream fileIn = new FileInputStream(baseDir + '/' + fileName);
+					envoyerFichier(fileIn, out);
+					System.out.println(message);
+				}
+			} else {
+				out.writeUTF(command);
+				out.flush();
+				message = in.readUTF();
+				System.out.println(message);
+				
+				if(message.substring(0, 2).equals("Le") && command.length() > 8 && command.substring(0, 9).equals("download ")) {
+					String fileName = command.substring(9, command.length());
+					fileOut = new FileOutputStream(fileName);
+					envoyerFichier(in, fileOut);
+				}
 			}
-			System.out.println("le while recommence");
-			
 		}
 		System.out.println("Client : Vous avez sorti de la boucle while.");
 		
@@ -120,10 +130,13 @@ public class client {
 	}
 	
 	public static void envoyerFichier(InputStream fileIn, OutputStream fileOut) throws IOException {
-		byte[] buffer = new byte[8192];
+		int bufferSize = 8192;
+		byte[] buffer = new byte[bufferSize];
 		int compteur = 0;
 		while ((compteur = fileIn.read(buffer)) > 0) {
 			fileOut.write(buffer, 0, compteur);
+			if(compteur != bufferSize)
+				break;
 		}
 	}
 }

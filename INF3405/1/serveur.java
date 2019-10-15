@@ -2,6 +2,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -99,7 +100,6 @@ public class serveur {
 				out.writeUTF("Hello from server - you are client #" + this.clientNumber);
 				DataInputStream in = new DataInputStream(socket.getInputStream());
 				String command = "";
-				// InputStream fileIn = new FileInputStream("send.jpg");
 				
 				// get current directory
 				baseDir = new java.io.File(".").getCanonicalPath();
@@ -111,7 +111,8 @@ public class serveur {
 				}
 				baseDir = new java.io.File("./serverRoot").getCanonicalPath();
 
-
+				// gerer envoi/reception des fichiers
+				OutputStream fileOut;
 				
 				while(!command.equals("exit")) {
 					command = in.readUTF();
@@ -168,9 +169,12 @@ public class serveur {
 					 	}
 
 					// upload
-					} else if (command.equals("upload")) {
-						out.writeUTF("server fait upload");
+					} else if (command.length() > 6 && command.substring(0, 7).equals("upload ")) {
+						String fileName = command.substring(7, command.length());
+						out.writeUTF("Le fichier " + fileName + " a bien ete televerse");
 						System.out.println("executing command : " + command);
+						fileOut = new FileOutputStream(getDir() + '/' + fileName);
+						envoyerFichier(in, fileOut);
 					
 					//download
 					} else if (command.length() > 8 && command.substring(0, 9).equals("download ")) {
@@ -179,7 +183,7 @@ public class serveur {
 						if(!Files.exists(path)) {
 							out.writeUTF("fichier " + fileName + " introuvable!" + '\n' + getDir());
 						} else {
-							out.writeUTF("server fait download");
+							out.writeUTF("Le fichier " + fileName + " a bien ete telecharge");
 							System.out.println("executing command : " + command);
 							InputStream fileIn = new FileInputStream(getDir() + '/' + fileName);
 							envoyerFichier(fileIn, out);
@@ -232,10 +236,13 @@ public class serveur {
 		}
 
 		public void envoyerFichier(InputStream fileIn, OutputStream fileOut) throws IOException {
-			byte[] buffer = new byte[8192];
+			int bufferSize = 8192;
+			byte[] buffer = new byte[bufferSize];
 			int compteur = 0;
-			while ((compteur = fileIn.read(buffer)) != -1) {
+			while ((compteur = fileIn.read(buffer)) > 0) {
 				fileOut.write(buffer, 0, compteur);
+				if(compteur != bufferSize)
+					break;
 			}
 		}
 	}

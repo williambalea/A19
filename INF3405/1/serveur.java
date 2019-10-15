@@ -13,6 +13,8 @@ import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Scanner;
 import java.util.Vector;
 import java.util.regex.Pattern;
@@ -119,7 +121,7 @@ public class serveur {
 					
 					// cd 
 					if (command.length() > 2 && command.substring(0, 3).equals("cd ")) {
-						System.out.println("executing command : " + command);
+						System.out.println(header(command));
 						String newDir = command.substring(3, command.length());
 						if(newDir.equals("..")) {
 							try {
@@ -141,7 +143,7 @@ public class serveur {
 					
 					// ls
 					} else if (command.equals("ls")) {
-						System.out.println("executing command : " + command);
+						System.out.println(header(command));
 						File dir = new File(".\\serverRoot" + getDirsList());
 						File[] liste = dir.listFiles();
 						String affichage = getDir();
@@ -158,7 +160,7 @@ public class serveur {
 	
 					// mkdir
 					} else if (command.length() > 5 && command.substring(0, 6).equals("mkdir ")) {
-						System.out.println("executing command : " + command);
+						System.out.println(header(command));
 						String newDir = command.substring(6, command.length());
 					 	Path path = Paths.get(getDir() + '/' + newDir);
 					 	if(!Files.exists(path)) {
@@ -172,7 +174,7 @@ public class serveur {
 					} else if (command.length() > 6 && command.substring(0, 7).equals("upload ")) {
 						String fileName = command.substring(7, command.length());
 						out.writeUTF("Le fichier " + fileName + " a bien ete televerse");
-						System.out.println("executing command : " + command);
+						System.out.println(header(command));
 						fileOut = new FileOutputStream(getDir() + '/' + fileName);
 						envoyerFichier(in, fileOut);
 					
@@ -184,7 +186,7 @@ public class serveur {
 							out.writeUTF("fichier " + fileName + " introuvable!" + '\n' + getDir());
 						} else {
 							out.writeUTF("Le fichier " + fileName + " a bien ete telecharge");
-							System.out.println("executing command : " + command);
+							System.out.println(header(command));
 							InputStream fileIn = new FileInputStream(getDir() + '/' + fileName);
 							envoyerFichier(fileIn, out);
 						}
@@ -244,6 +246,14 @@ public class serveur {
 				if(compteur != bufferSize)
 					break;
 			}
+		}
+
+		public String header(String command) {
+			DateTimeFormatter date = DateTimeFormatter.ofPattern("yyyy-MM-dd@HH:mm:ss");  
+			LocalDateTime now = LocalDateTime.now();  
+			// System.out.println(dtf.format(now));  
+			String buffer = "[" + socket.getInetAddress().toString().substring(1) + ":" + socket.getPort() + " - " + date.format(now) + "] : " + command ;
+			return buffer;
 		}
 	}
 }
